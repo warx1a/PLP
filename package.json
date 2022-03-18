@@ -1,0 +1,17 @@
+{
+  "name": "about-us",
+  "dependencies": {
+    "restify": "8.6.1",
+    "mysql": "2.18.1"
+  },
+  "scripts": {
+    "start": "node launcher.js",
+    "web": "node launcher.js"
+  },
+  "engines": {
+    "node": "14.17.3"
+  },
+  "version": "1.0.0",
+  "main": "launcher.js",
+  "description": "About us page for Luke Jensen"
+}
