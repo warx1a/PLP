@@ -1,4 +1,4 @@
-var restify = require("restify"), https = require("https");
+var restify = require("restify");
 var fs = require("fs");
 var AJAXManager = require("./managers/AJAXManager")
 
@@ -53,10 +53,11 @@ init(function() {
      * This endpoint will return the current weather for Lincoln, NE
      */
     server.get("/getWeather", function(req,res,next) {
-        var returnObject = AJAXManager.GetWeather();
-        res.write(JSON.stringify(returnObject));
-        res.end();
-        return next();
+        AJAXManager.GetWeather(config, function(weather) {
+            res.write(JSON.stringify(weather));
+            res.end();
+            return next();
+        });
     });
 
     /**

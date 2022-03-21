@@ -1,4 +1,8 @@
+var https = require("https");
+
 class AJAXManager {
+
+    
 
     constructor() {}
 
@@ -21,11 +25,8 @@ class AJAXManager {
         return returnObject;
     }
 
-    static GetWeather() {
-        var returnObject = {
-            success: false,
-            message: ""
-        };
+    static GetWeather(config, callback) {
+        var returnObject = {};
         //this function will call the weather API, and return it in a format we like
         if(config.OpenWeatherMapAPIKey) {
             if(config.LincolnNELatLon) {
@@ -33,7 +34,8 @@ class AJAXManager {
                 var lon = config.LincolnNELatLon.Lon;
                 var key = config.OpenWeatherMapAPIKey;
                 var returnData = [];
-                var ajaxCall = https.get(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${key}`, function(ajaxRes) {
+                var urlToUse = "https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/Lincoln%2C%20NE?unitGroup=metric&include=current%2Cdays&key=VHHD6G35YZ6VVD976WCDCQ2HS&contentType=json"
+                var ajaxCall = https.get(urlToUse, function(ajaxRes) {
                     ajaxRes.on("data", function(chunk) {
                         returnData.push(chunk);
                     });
@@ -42,23 +44,22 @@ class AJAXManager {
                     });
                     ajaxRes.on("end", function() {
                         var body = Buffer.concat(returnData).toString();
-                        //TODO: figure out what to do w/ this body
+                        returnObject.data = body;
                         returnObject.success = true;
-                        return returnObject;
-                    });
-                    ajaxCall.on("error", function(err) {
-                        returnObject.message = err;
+                        callback(returnObject);
                     });
                 }).on("error", function(err2) {
-                    returnObject.message = err2;
+                    returnObject.message = err2.message;
+                    callback(returnObject);
                 });
             } else {
                 returnObject.message = "The latitude/longitude couldn't be retrieved for the current location"
+                callback(returnObject);
             }
         } else {
             returnObject.message = "We couldn't parse the config file, so the API key is invalid"
+            callback(returnObject);
         }
-        return returnObject;
     }
 
 }
