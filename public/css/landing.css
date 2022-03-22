@@ -1,7 +1,10 @@
+body {
+    margin: 0;
+}
+
 .upper-container {
     width: 100%;
     height: 60vh;
-    border: 3px solid black;
 }
 
 .news-holder {
@@ -17,6 +20,24 @@
     display: inline-block;
     background-color: green;
     vertical-align: top;
+}
+
+#welcomeMessage {
+    position: relative;
+    z-index: 3;
+    font-size: 125%;
+    font-weight: bold;
+    background-color: white;
+    display: table-cell;
+}
+
+#dateHeader {
+    position: relative;
+    z-index: 3;
+    font-size: 125%;
+    font-weight: bold;
+    background-color: white;
+    display: table-cell;
 }
 
 .right-pane-holder {
@@ -83,6 +104,9 @@
     background-color: rebeccapurple;
 }
 
-.ideas-holder {
-    
+.main-section-img {
+    max-width: 100%;
+    max-height: 100%;
+    position: absolute;
+    top: 0px;
 }

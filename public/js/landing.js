@@ -1,5 +1,6 @@
 $(document).ready(function() {
     getWelcomeMessage();
+    getLandingPageImage();
 });
 
 function getUpdatedWeather() {
@@ -44,4 +45,18 @@ function getWelcomeMessage() {
     var year = currentDate.getFullYear();
     var sParsedDateVal = `Today's date is ${month}/${day}/${year}`;
     $("#dateHeader").text(sParsedDateVal);
+}
+
+function getLandingPageImage() {
+    var xhrLandingImageReq = new XMLHttpRequest();
+    xhrLandingImageReq.onload = function() {
+        var img = document.createElement("img");
+        img.src = this.response;
+        img.className = "main-section-img";
+        img.width = $(".main-section-holder").width();
+        img.height = $(".main-section-holder").height();
+        $(".main-section-holder").append(img);
+    }
+    xhrLandingImageReq.open("GET", "/getLandingImage");
+    xhrLandingImageReq.send();
 }

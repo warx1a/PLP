@@ -1,4 +1,5 @@
 var https = require("https");
+var fs = require("fs");
 
 class AJAXManager {
 
@@ -62,11 +63,23 @@ class AJAXManager {
         }
     }
 
-}
+    static GetLandingPageImage(config, callback) {
+        var returnImg = {};
+        if(config.PhotoStorageDirectory) {
+            var allFiles = [];
+            var files = fs.readdirSync(config.PhotoStorageDirectory);
+            files.forEach(function(file) {
+                allFiles.push(file);
+            });
+            var randIdx = parseInt(Math.random() * allFiles.length);
+            var chosenFile = allFiles[randIdx];
+            var imgBuffer = fs.readFileSync(config.PhotoStorageDirectory + chosenFile, "base64");
+            returnImg.data = "data:image/png;base64," + imgBuffer;
+            returnImg.ext = chosenFile.substr(chosenFile.indexOf(".") + 1);
+            callback(returnImg);
+        }
+    }
 
-function determineIconForWeather(weatherData) {
-    var jBody = JSON.parse(weatherData);
-    var currentCond = jBody.currentConditions;
 }
 
 module.exports = AJAXManager;

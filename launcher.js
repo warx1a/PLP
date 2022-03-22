@@ -60,6 +60,17 @@ init(function() {
         });
     });
 
+    server.get("/getLandingImage", function(req,res,next) {
+        //TODO: add in logic to read the collage directory
+        AJAXManager.GetLandingPageImage(config, function(img) {
+            res.send(200, img.data, {
+                "Content-Type": "image/" + img.ext.toLowerCase()
+            });
+            res.end();
+            return next();
+        });
+    });
+
     /**
      * This endpoint will return the welcome message to use on the landing page.
      */
