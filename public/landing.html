@@ -1,6 +1,7 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script type="text/javascript" src="./js/landing.js"></script>
         <link rel="stylesheet" type="text/css" href="./css/landing.css">
         <title>Luther Jensen - PLP</title>
@@ -12,11 +13,11 @@
 
                 </div>
                 <div class="main-section-holder">
-
+                    <div id="welcomeMessage"></div>
+                    <div id="dateHeader"></div>
                 </div>
                 <div class="right-pane-holder">
-                    <div class="weather-holder">
-
+                    <div class="quote-holder">
                     </div>
                     <div class="todo-holder">
 
@@ -24,23 +25,23 @@
                 </div>
             </div>
             <div class="lower-container">
-                <div class="ideas-holder">
-
+                <div class="weather-holder">
+                    <div class="current-conditions">
+                        <div class="condition-holder">
+                            
+                        </div>
+                        <div class="current-temp">
+                            <span id="spnCurrentTemp"></span>
+                        </div>
+                        <div class="current-description">
+                            <span id="spnCurrentDesc"></span>
+                        </div>
+                    </div>
+                    <div class="future-weather">
+                        
+                    </div>
                 </div>
-                <div class="links-holder">
-                    <button type="button" class="link-btn">
-                        <a href="https://old.reddit.com">Reddit</a>
-                    </button>
-                    <button type="button" class="link-btn">
-                        <a href="https://www.google.com">Google</a>
-                    </button>
-                    <button type="button" class="link-btn">
-                        <a href="https://www.facebook.com">Facebook</a>
-                    </button>
-                    <button type="button" class="link-btn">
-                        <a href="https://www.twitter.com">Twitter</a>
-                    </button>
-                </div>
+                
             </div>
         </div>
     </body>

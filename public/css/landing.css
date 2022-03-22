@@ -16,23 +16,62 @@
     height: 100%;
     display: inline-block;
     background-color: green;
+    vertical-align: top;
 }
 
 .right-pane-holder {
     height: 100%;
     width: 19.5%;
     display: inline-block;
+    vertical-align: top;
 }
 
 .weather-holder {
-    height: 50%;
+    height: 100%;
     width: 100%;
     display: block;
     background-color: cyan;
 }
 
+.current-conditions {
+    width: 20%;
+    height: 100%;
+    display: inline-block;
+    text-align: center;
+    font-weight: bold;
+    font-size: 120%;
+}
+
+.condition-holder {
+    margin-top: 5px;
+    height: 60%;
+}
+
+.weather-icon {
+    height: 100%;
+}
+
+.current-temp {
+    margin-top: 10px;
+}
+
+.current-description {
+    margin-top: 10px;
+}
+
+.current-conditions div {
+    display: block;
+}
+
+.quote-holder {
+    height: 39%;
+    width: 100%;
+    display: block;
+    background-color: orange;
+}
+
 .todo-holder {
-    height: 50%;
+    height: 60%;
     width: 100%;
     display: block;
     background-color: magenta;

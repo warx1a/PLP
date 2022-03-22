@@ -34,7 +34,7 @@ class AJAXManager {
                 var lon = config.LincolnNELatLon.Lon;
                 var key = config.OpenWeatherMapAPIKey;
                 var returnData = [];
-                var urlToUse = "https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/Lincoln%2C%20NE?unitGroup=metric&include=current%2Cdays&key=VHHD6G35YZ6VVD976WCDCQ2HS&contentType=json"
+                var urlToUse = "https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/Lincoln%2C%20NE?unitGroup=us&include=current%2Cdays&key=VHHD6G35YZ6VVD976WCDCQ2HS&contentType=json"
                 var ajaxCall = https.get(urlToUse, function(ajaxRes) {
                     ajaxRes.on("data", function(chunk) {
                         returnData.push(chunk);
@@ -62,6 +62,11 @@ class AJAXManager {
         }
     }
 
+}
+
+function determineIconForWeather(weatherData) {
+    var jBody = JSON.parse(weatherData);
+    var currentCond = jBody.currentConditions;
 }
 
 module.exports = AJAXManager;
