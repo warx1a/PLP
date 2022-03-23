@@ -1,5 +1,7 @@
 var https = require("https");
 var fs = require("fs");
+var xmlParser = require("fast-xml-parser");
+const { syncBuiltinESMExports } = require("module");
 
 class AJAXManager {
 
@@ -78,6 +80,43 @@ class AJAXManager {
             returnImg.ext = chosenFile.substr(chosenFile.indexOf(".") + 1);
             callback(returnImg);
         }
+    }
+
+    static GetTopStories(storyCount, callback) {
+        var sNYTRSSFeed = "https://rss.nytimes.com/services/xml/rss/nyt/World.xml";
+        var returnData = [];
+        var ajaxCall = https.get(sNYTRSSFeed, function(ajaxRes) {
+            ajaxRes.on("data", function(chunk) {
+                returnData.push(chunk);
+            });
+            ajaxRes.on("error", function(e) {
+                console.log(e);
+            });
+            ajaxRes.on("end", function() {
+                var retData = Buffer.concat(returnData).toString();
+                var oParser = new xmlParser.XMLParser();
+                var jResp = oParser.parse(retData);
+                var jDataToReturn = {
+                    stories: []
+                };
+                //if we have a RSS channel returned, and if it has items
+                if(jResp.rss.channel) {
+                    if(jResp.rss.channel.item.length > 0) {
+                        for(var i = 0; i < Math.min(jResp.rss.channel.item.length, storyCount); i++) {
+                            var oStory = jResp.rss.channel.item[i];
+                            jDataToReturn.stories.push({
+                                title: oStory.title,
+                                link: oStory.link,
+                                from: oStory["dc:creator"]
+                            });
+                        }
+                        callback(jDataToReturn);
+                    }
+                }
+            });
+        }).on("error", function(err) {
+            callback(err);
+        });
     }
 
 }

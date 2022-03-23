@@ -1,6 +1,7 @@
 $(document).ready(function() {
     getWelcomeMessage();
     getLandingPageImage();
+    getTopStories();
 });
 
 function getUpdatedWeather() {
@@ -59,4 +60,32 @@ function getLandingPageImage() {
     }
     xhrLandingImageReq.open("GET", "/getLandingImage");
     xhrLandingImageReq.send();
+}
+
+function getTopStories() {
+    var xhrNewsRequest = new XMLHttpRequest();
+    xhrNewsRequest.onload = function() {
+        $(".news-holder").empty();
+        var resp = JSON.parse(this.response);
+        for(var i = 0; i < resp.stories.length; i++) {
+            var story = resp.stories[i];
+            addNewsElement(story.title, story.link);
+        }
+    }
+    xhrNewsRequest.open("GET", "/getTopStories");
+    xhrNewsRequest.send();
+}
+
+
+function addNewsElement(title, link) {
+    var storyHolder = document.createElement("div");
+    var storyTitle = document.createElement("span");
+    var storyLink = document.createElement("a");
+    storyHolder.className = "news-article";
+    storyLink.href = link;
+    storyLink.target = "_blank";
+    storyLink.innerText = title;
+    storyTitle.appendChild(storyLink);
+    storyHolder.appendChild(storyTitle);
+    $(".news-holder").append(storyHolder);
 }

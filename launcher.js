@@ -1,6 +1,6 @@
 var restify = require("restify");
 var fs = require("fs");
-var AJAXManager = require("./managers/AJAXManager")
+var AJAXManager = require("./managers/AJAXManager");
 
 //placeholder for the html files
 var files = {};
@@ -65,6 +65,16 @@ init(function() {
         AJAXManager.GetLandingPageImage(config, function(img) {
             res.send(200, img.data, {
                 "Content-Type": "image/" + img.ext.toLowerCase()
+            });
+            res.end();
+            return next();
+        });
+    });
+
+    server.get("/getTopStories", function(req,res,next) {
+        AJAXManager.GetTopStories(3, function(stories) {
+            res.send(200, stories, {
+                "Content-Type": "application/json"
             });
             res.end();
             return next();

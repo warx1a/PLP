@@ -14,6 +14,15 @@ body {
     height: 100%;
 }
 
+.news-article {
+    border: 2px solid black;
+}
+
+.news-article span a {
+    color: darkblue;
+    font-size: 80%;
+}
+
 .main-section-holder {
     width: 60%;
     height: 100%;
