@@ -12,6 +12,11 @@ body {
     background-color: gray;
     width: 19.5%;
     height: 100%;
+    overflow-y: scroll;
+}
+
+.news-holder::-webkit-scrollbar {
+    display: none;
 }
 
 .news-article {

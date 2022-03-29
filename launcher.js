@@ -99,7 +99,7 @@ init(function() {
                 res.end();
                 return next();
             }).catch(function(error) {
-                res.send(200, err);
+                res.send(200, error);
                 res.end();
                 return next();
             });

@@ -71,6 +71,7 @@ function getTopStories() {
             var story = resp[i];
             addNewsElement(story.title, story.link);
         }
+        beginAutoscrollOfNews(10);
     }
     xhrNewsRequest.open("GET", "/getTopStories");
     xhrNewsRequest.send();
@@ -88,4 +89,42 @@ function addNewsElement(title, link) {
     storyTitle.appendChild(storyLink);
     storyHolder.appendChild(storyTitle);
     $(".news-holder").append(storyHolder);
+}
+
+function beginAutoscrollOfNews(scrollPeriodSeconds) {
+    var newsHolder = $(".news-holder");
+    var newsSectionHeight = newsHolder.outerHeight();
+    var cumulativeArticleHeight = 0;
+    //calculate the height of all the articles stacked up
+    for(var i = 0; i < newsHolder.children().length; i++) {
+        var article = newsHolder.children()[i];
+        var articleHeight = $(article).outerHeight();
+        cumulativeArticleHeight += articleHeight;
+    }
+    //if the section height is less then all the articles, then we know we need to scroll on it
+    if(newsSectionHeight < cumulativeArticleHeight) {
+        var distanceToScroll = cumulativeArticleHeight - newsSectionHeight;
+        //divide the total by 4, since we want to run the function every quarter second
+        var nAmountToScrollBy = (distanceToScroll / scrollPeriodSeconds) / 4;
+        var bScrollingDown = true;
+        //var bAtBottom = newsHolder.scrollTop - (newsHolder.scrollHeight - newsHolder.offsetHeight) == 0;
+        setInterval(function() {
+            var bAtBottom = newsHolder[0].scrollTop - (newsHolder[0].scrollHeight - newsHolder[0].offsetHeight) == 0;
+            var bAtTop = newsHolder[0].scrollTop == 0;
+            if(!bAtBottom && bScrollingDown) {
+                newsHolder[0].scrollBy(0, parseInt(nAmountToScrollBy));
+            } else {
+                if(bAtBottom) {
+                    bScrollingDown = false;
+                }
+            }
+            if(!bAtTop && !bScrollingDown) {
+                newsHolder[0].scrollBy(0, parseInt(nAmountToScrollBy * -1));
+            } else {
+                if(bAtTop) {
+                    bScrollingDown = true;
+                }
+            }
+        }, 250);
+    }
 }
