@@ -1,6 +1,7 @@
 var restify = require("restify");
 var fs = require("fs");
 var AJAXManager = require("./managers/AJAXManager");
+const { resolve } = require("path");
 
 //placeholder for the html files
 var files = {};
@@ -61,9 +62,10 @@ init(function() {
     });
 
     server.get("/getLandingImage", function(req,res,next) {
-        //TODO: add in logic to read the collage directory
+        //get the landing page image from the directory
         AJAXManager.GetLandingPageImage(config, function(img) {
             res.send(200, img.data, {
+                //make sure to specify the correct content type depending on the images extension
                 "Content-Type": "image/" + img.ext.toLowerCase()
             });
             res.end();
@@ -72,13 +74,36 @@ init(function() {
     });
 
     server.get("/getTopStories", function(req,res,next) {
-        AJAXManager.GetTopStories(3, function(stories) {
-            res.send(200, stories, {
-                "Content-Type": "application/json"
+        //if we have a list of RSS feeds for the NYT to use
+        if(config.NYTRssFeeds) {
+            var promisesToMake = [];
+            for(var i = 0; i < config.NYTRssFeeds.length; i++) {
+                var rssFeedURL = config.NYTRssFeeds[i];
+                //wrap each call in a promise, so that we can resolve them all at the same time
+                promisesToMake.push(new Promise((resolve, reject) => {
+                    AJAXManager.GetTopStories(3, rssFeedURL, function(stories) {
+                        if(stories.success) {
+                            resolve(stories.stories);
+                        } else {
+                            reject(stories);
+                        }
+                    });
+                }));
+            }
+            //wait for all these promises to resolve, then concatenate the results
+            Promise.all(promisesToMake).then(function(results) {
+                results = results.flat();
+                res.send(200, results, {
+                    "Content-Type": "application/json"
+                });
+                res.end();
+                return next();
+            }).catch(function(error) {
+                res.send(200, err);
+                res.end();
+                return next();
             });
-            res.end();
-            return next();
-        });
+        }
     });
 
     /**

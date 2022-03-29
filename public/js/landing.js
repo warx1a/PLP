@@ -67,8 +67,8 @@ function getTopStories() {
     xhrNewsRequest.onload = function() {
         $(".news-holder").empty();
         var resp = JSON.parse(this.response);
-        for(var i = 0; i < resp.stories.length; i++) {
-            var story = resp.stories[i];
+        for(var i = 0; i < resp.length; i++) {
+            var story = resp[i];
             addNewsElement(story.title, story.link);
         }
     }

@@ -29,7 +29,9 @@ class AJAXManager {
     }
 
     static GetWeather(config, callback) {
-        var returnObject = {};
+        var returnObject = {
+            success: true
+        };
         //this function will call the weather API, and return it in a format we like
         if(config.OpenWeatherMapAPIKey) {
             if(config.LincolnNELatLon) {
@@ -48,44 +50,62 @@ class AJAXManager {
                     ajaxRes.on("end", function() {
                         var body = Buffer.concat(returnData).toString();
                         returnObject.data = body;
-                        returnObject.success = true;
                         callback(returnObject);
                     });
                 }).on("error", function(err2) {
                     returnObject.message = err2.message;
+                    returnObject.success = false;
                     callback(returnObject);
                 });
             } else {
-                returnObject.message = "The latitude/longitude couldn't be retrieved for the current location"
+                returnObject.message = "The latitude/longitude couldn't be retrieved for the current location";
+                returnObject.success = false;
                 callback(returnObject);
             }
         } else {
-            returnObject.message = "We couldn't parse the config file, so the API key is invalid"
+            returnObject.message = "We couldn't parse the config file, so the API key is invalid";
+            returnObject.success = false;
             callback(returnObject);
         }
     }
 
     static GetLandingPageImage(config, callback) {
-        var returnImg = {};
+        var returnImg = {
+            success: true
+        };
+        var bPhotoDirectoryExists;
+        //if we have a photo storage directory and it exists
         if(config.PhotoStorageDirectory) {
-            var allFiles = [];
-            var files = fs.readdirSync(config.PhotoStorageDirectory);
-            files.forEach(function(file) {
-                allFiles.push(file);
-            });
-            var randIdx = parseInt(Math.random() * allFiles.length);
-            var chosenFile = allFiles[randIdx];
-            var imgBuffer = fs.readFileSync(config.PhotoStorageDirectory + chosenFile, "base64");
-            returnImg.data = "data:image/png;base64," + imgBuffer;
-            returnImg.ext = chosenFile.substr(chosenFile.indexOf(".") + 1);
-            callback(returnImg);
+            bPhotoDirectoryExists = fs.existsSync(config.PhotoStorageDirectory);
+            if(bPhotoDirectoryExists) {
+                var allFiles = [];
+                var files = fs.readdirSync(config.PhotoStorageDirectory);
+                files.forEach(function(file) {
+                    allFiles.push(file);
+                });
+                var randIdx = parseInt(Math.random() * allFiles.length);
+                var chosenFile = allFiles[randIdx];
+                //read the file as a base64 string, and return the image data that way
+                var imgBuffer = fs.readFileSync(config.PhotoStorageDirectory + chosenFile, "base64");
+                returnImg.data = "data:image/png;base64," + imgBuffer;
+                returnImg.ext = chosenFile.substr(chosenFile.indexOf(".") + 1);
+                callback(returnImg);
+            } else {
+                //the directory doesn't exist on this server, so throw an error for it
+                returnImg.data= "";
+                returnImg.ext = "text";
+                returnImg.message = "The photos directory doesn't exist on this server.";
+                returnImg.success = false;
+                callback(returnImg);
+            }
+            
         }
     }
 
-    static GetTopStories(storyCount, callback) {
-        var sNYTRSSFeed = "https://rss.nytimes.com/services/xml/rss/nyt/World.xml";
+    static GetTopStories(storyCount, rssURL, callback) {
         var returnData = [];
-        var ajaxCall = https.get(sNYTRSSFeed, function(ajaxRes) {
+        //make the call to the rss feed
+        var ajaxCall = https.get(rssURL, function(ajaxRes) {
             ajaxRes.on("data", function(chunk) {
                 returnData.push(chunk);
             });
@@ -93,15 +113,19 @@ class AJAXManager {
                 console.log(e);
             });
             ajaxRes.on("end", function() {
+                //convert the buffer to a string
                 var retData = Buffer.concat(returnData).toString();
+                //parse out the XML of the returned data
                 var oParser = new xmlParser.XMLParser();
                 var jResp = oParser.parse(retData);
                 var jDataToReturn = {
+                    success: true,
                     stories: []
                 };
                 //if we have a RSS channel returned, and if it has items
                 if(jResp.rss.channel) {
                     if(jResp.rss.channel.item.length > 0) {
+                        //go through each story returned
                         for(var i = 0; i < Math.min(jResp.rss.channel.item.length, storyCount); i++) {
                             var oStory = jResp.rss.channel.item[i];
                             jDataToReturn.stories.push({
@@ -115,7 +139,11 @@ class AJAXManager {
                 }
             });
         }).on("error", function(err) {
-            callback(err);
+            var errToReturn = {
+                success: false,
+                message: err
+            };
+            callback(errToReturn);
         });
     }
 
