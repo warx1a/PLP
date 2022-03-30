@@ -68,6 +68,12 @@ body {
     background-color: cyan;
 }
 
+.future-weather {
+    width: 79%;
+    display: inline-block;
+}
+
+
 .current-conditions {
     width: 20%;
     height: 100%;
@@ -75,6 +81,7 @@ body {
     text-align: center;
     font-weight: bold;
     font-size: 120%;
+    vertical-align: top;
 }
 
 .condition-holder {
@@ -84,6 +91,11 @@ body {
 
 .weather-icon {
     height: 100%;
+}
+
+.day-weather-icon {
+    height: 50%;
+    margin-top: 5px;
 }
 
 .current-temp {
@@ -96,6 +108,13 @@ body {
 
 .current-conditions div {
     display: block;
+}
+
+.weather-day-holder {
+    width: 19.75%;
+    display: inline-block;
+    text-align: center;
+    font-weight: bold;
 }
 
 .quote-holder {

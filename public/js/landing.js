@@ -2,6 +2,7 @@ $(document).ready(function() {
     getWelcomeMessage();
     getLandingPageImage();
     getTopStories();
+    getUpdatedWeather();
 });
 
 function getUpdatedWeather() {
@@ -14,7 +15,7 @@ function getUpdatedWeather() {
             var currentTemp = currentWeather.temp + " °F";
             var currentConditions = currentWeather.conditions;
             var sIcon = currentWeather.icon;
-            var sIconSRC = `./weatherIcons/${sIcon}.svg`
+            var sIconSRC = `./weatherIcons/${sIcon}.svg`;
             $(".condition-holder").empty();
             var iconImg = document.createElement("img");
             iconImg.className = "weather-icon";
@@ -22,8 +23,15 @@ function getUpdatedWeather() {
             $(".condition-holder").append(iconImg);
             $("#spnCurrentTemp").text(currentTemp);
             $("#spnCurrentDesc").text(currentConditions);
+            //add in the future weather elements too
+            var daysData = jWeatherData.days;
+            var nMaxDaysOut = 5;
+            $(".future-weather").empty();
+            for(var i = 0; i < Math.min(5, daysData.length); i++) {
+                var dayData = daysData[i];
+                addDaysWeather(dayData);
+            }
         }
-        var test = "";
     };
     xhrWeatherRequest.open("GET", "/getWeather");
     xhrWeatherRequest.send();
@@ -127,4 +135,31 @@ function beginAutoscrollOfNews(scrollPeriodSeconds) {
             }
         }, 250);
     }
+}
+
+function addDaysWeather(jWeatherData) {
+    var parsedDate = new Date(jWeatherData.datetime);
+    var formattedDate = (parsedDate.getMonth() + 1) + "/" + parsedDate.getDate();
+    var daysTemp = jWeatherData.temp + " °F";;
+    var daysIcon = jWeatherData.icon;
+    var sIconSRC = `./weatherIcons/${daysIcon}.svg`;
+    var daysCondition = jWeatherData.conditions;
+    var divDayHolder = document.createElement("div");
+    var tempHolder = document.createElement("div");
+    var conditionHolder = document.createElement("div");
+    var dateHolder = document.createElement("div");
+    divDayHolder.className = "weather-day-holder";
+    dateHolder.innerText = formattedDate;
+    dateHolder.className = "day-date";
+    conditionHolder.innerText = daysCondition;
+    tempHolder.innerText = daysTemp;
+    tempHolder.className = "day-temp-holder";
+    var dayIconHolder = document.createElement("img");
+    dayIconHolder.src = sIconSRC;
+    dayIconHolder.className = "day-weather-icon";
+    divDayHolder.appendChild(dayIconHolder);
+    divDayHolder.appendChild(tempHolder);
+    divDayHolder.appendChild(conditionHolder);
+    divDayHolder.appendChild(dateHolder);
+    $(".future-weather").append(divDayHolder);
 }
