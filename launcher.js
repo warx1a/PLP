@@ -1,6 +1,7 @@
 var restify = require("restify");
 var fs = require("fs");
 var AJAXManager = require("./managers/AJAXManager");
+var CacheManager = require("./managers/CacheManager");
 const { resolve } = require("path");
 
 //placeholder for the html files
@@ -12,6 +13,9 @@ var server = restify.createServer({
 });
 
 var config = {};
+
+var oCache = new CacheManager();
+var oAJAXManager = new AJAXManager(oCache);
 
 server.use(restify.plugins.acceptParser(server.acceptable));
 server.use(restify.plugins.queryParser());
@@ -54,7 +58,7 @@ init(function() {
      * This endpoint will return the current weather for Lincoln, NE
      */
     server.get("/getWeather", function(req,res,next) {
-        AJAXManager.GetWeather(config, function(weather) {
+        oAJAXManager.GetWeather(config, function(weather) {
             res.write(JSON.stringify(weather));
             res.end();
             return next();
@@ -114,6 +118,16 @@ init(function() {
         res.write(JSON.stringify(returnObject));
         res.end();
         return next();
+    });
+
+    server.get("/getMarketData", function(req,res,next) {
+        oAJAXManager.GetMarketData(config, function(marketData) {
+            res.send(200, marketData, {
+                "Content-Type": "application/json"
+            });
+            res.end();
+            return next();
+        });
     });
 
     // catch-all for static content

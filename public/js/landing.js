@@ -3,12 +3,17 @@ $(document).ready(function() {
     getLandingPageImage();
     getTopStories();
     getUpdatedWeather();
+    GetMarketData();
 });
-
-function getUpdatedWeather() {
+/**
+ * Calls the AJAX function to get the latest weather
+ * @param {int} [nMaxDays=5] - Max days to show
+ */
+function getUpdatedWeather(nMaxDays = 5) {
     var xhrWeatherRequest = new XMLHttpRequest();
     xhrWeatherRequest.onload = function() {
         var jResp = JSON.parse(this.response);
+        //if we have a successful response
         if(jResp.success) {
             var jWeatherData = JSON.parse(jResp.data);
             var currentWeather = jWeatherData.currentConditions;
@@ -16,6 +21,7 @@ function getUpdatedWeather() {
             var currentConditions = currentWeather.conditions;
             var sIcon = currentWeather.icon;
             var sIconSRC = `./weatherIcons/${sIcon}.svg`;
+            //clear out the condition holder, so we can add in the updated conditions
             $(".condition-holder").empty();
             var iconImg = document.createElement("img");
             iconImg.className = "weather-icon";
@@ -25,9 +31,8 @@ function getUpdatedWeather() {
             $("#spnCurrentDesc").text(currentConditions);
             //add in the future weather elements too
             var daysData = jWeatherData.days;
-            var nMaxDaysOut = 5;
             $(".future-weather").empty();
-            for(var i = 0; i < Math.min(5, daysData.length); i++) {
+            for(var i = 0; i < Math.min(nMaxDays, daysData.length); i++) {
                 var dayData = daysData[i];
                 addDaysWeather(dayData);
             }
@@ -37,6 +42,9 @@ function getUpdatedWeather() {
     xhrWeatherRequest.send();
 }
 
+/**
+ * Calls the AJAX function to get the welcome message (ex: Good Morning/Afternoon/Evening)
+ */
 function getWelcomeMessage() {
     var xhrWelcomeRequest = new XMLHttpRequest();
     xhrWelcomeRequest.onload = function() {
@@ -56,6 +64,9 @@ function getWelcomeMessage() {
     $("#dateHeader").text(sParsedDateVal);
 }
 
+/**
+ * Calls the AJAX function to get a random landing page image
+ */
 function getLandingPageImage() {
     var xhrLandingImageReq = new XMLHttpRequest();
     xhrLandingImageReq.onload = function() {
@@ -70,6 +81,9 @@ function getLandingPageImage() {
     xhrLandingImageReq.send();
 }
 
+/**
+ * Call the AJAX function to get the top stories
+ */
 function getTopStories() {
     var xhrNewsRequest = new XMLHttpRequest();
     xhrNewsRequest.onload = function() {
@@ -79,13 +93,18 @@ function getTopStories() {
             var story = resp[i];
             addNewsElement(story.title, story.link);
         }
+        //start auto scrolling the news section if we need to
         beginAutoscrollOfNews(10);
     }
     xhrNewsRequest.open("GET", "/getTopStories");
     xhrNewsRequest.send();
 }
 
-
+/**
+ * This function will add in a new news element to the news section
+ * @param {string} title 
+ * @param {string} link 
+ */
 function addNewsElement(title, link) {
     var storyHolder = document.createElement("div");
     var storyTitle = document.createElement("span");
@@ -99,6 +118,10 @@ function addNewsElement(title, link) {
     $(".news-holder").append(storyHolder);
 }
 
+/**
+ * This function will auto scroll the news section, and will have it shift up and down to show all available stories
+ * @param {int} scrollPeriodSeconds 
+ */
 function beginAutoscrollOfNews(scrollPeriodSeconds) {
     var newsHolder = $(".news-holder");
     var newsSectionHeight = newsHolder.outerHeight();
@@ -113,7 +136,7 @@ function beginAutoscrollOfNews(scrollPeriodSeconds) {
     if(newsSectionHeight < cumulativeArticleHeight) {
         var distanceToScroll = cumulativeArticleHeight - newsSectionHeight;
         //divide the total by 4, since we want to run the function every quarter second
-        var nAmountToScrollBy = (distanceToScroll / scrollPeriodSeconds) / 4;
+        var nAmountToScrollBy = Math.max(1, parseInt((distanceToScroll / scrollPeriodSeconds) / 4));
         var bScrollingDown = true;
         //var bAtBottom = newsHolder.scrollTop - (newsHolder.scrollHeight - newsHolder.offsetHeight) == 0;
         setInterval(function() {
@@ -137,6 +160,10 @@ function beginAutoscrollOfNews(scrollPeriodSeconds) {
     }
 }
 
+/**
+ * This function will add in the day's weather to our weather section on the bottom
+ * @param {JSON} jWeatherData 
+ */
 function addDaysWeather(jWeatherData) {
     var parsedDate = new Date(jWeatherData.datetime);
     var formattedDate = (parsedDate.getMonth() + 1) + "/" + parsedDate.getDate();
@@ -162,4 +189,29 @@ function addDaysWeather(jWeatherData) {
     divDayHolder.appendChild(conditionHolder);
     divDayHolder.appendChild(dateHolder);
     $(".future-weather").append(divDayHolder);
+}
+
+function GetMarketData() {
+    var xhrMarketRequest = new XMLHttpRequest();
+    xhrMarketRequest.onload = function() {
+        var marketData = this.response;
+        var jMarketData = JSON.parse(marketData);
+        //if we have BTC market data, add it to our view
+        if(jMarketData.data && jMarketData.success) {
+            for(var i = 0; i < jMarketData.data.length; i++) {
+                var marketData = jMarketData.data[i];
+                var startVal = marketData.previousCloseVal;
+                var currVal = marketData.currentVal;
+                var ciu = marketData.changeInUnits;
+                var nUnitChange = parseInt(ciu);
+                var sGainLossClass = nUnitChange > 0 ? "market-gain" : "market-loss";
+                var marketSymbol = marketData.exchangeName.toLowerCase();
+                $("#" + marketSymbol + "CurrentVal").text(currVal);
+                $("#" + marketSymbol + "DownUp").text("(" + ciu + ")").parent().attr("class", sGainLossClass);
+            }
+            
+        }
+    };
+    xhrMarketRequest.open("GET", "/getMarketData");
+    xhrMarketRequest.send();
 }

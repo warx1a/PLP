@@ -5,9 +5,11 @@ const { syncBuiltinESMExports } = require("module");
 
 class AJAXManager {
 
-    
+    cache;
 
-    constructor() {}
+    constructor(cache) {
+        this.cache = cache;
+    }
 
     static GetWelcomeMessage() {
         var currentTimeOfDay = new Date(Date.now());
@@ -28,44 +30,49 @@ class AJAXManager {
         return returnObject;
     }
 
-    static GetWeather(config, callback) {
+    GetWeather(config, callback) {
         var returnObject = {
             success: true
         };
-        //this function will call the weather API, and return it in a format we like
-        if(config.OpenWeatherMapAPIKey) {
-            if(config.LincolnNELatLon) {
-                var lat = config.LincolnNELatLon.Lat;
-                var lon = config.LincolnNELatLon.Lon;
-                var key = config.OpenWeatherMapAPIKey;
-                var returnData = [];
-                var urlToUse = "https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/Lincoln%2C%20NE?unitGroup=us&include=current%2Cdays&key=VHHD6G35YZ6VVD976WCDCQ2HS&contentType=json"
-                var ajaxCall = https.get(urlToUse, function(ajaxRes) {
-                    ajaxRes.on("data", function(chunk) {
-                        returnData.push(chunk);
-                    });
-                    ajaxRes.on("error", function(e) {
-                        console.log(e);
-                    });
-                    ajaxRes.on("end", function() {
-                        var body = Buffer.concat(returnData).toString();
-                        returnObject.data = body;
+        var oCachedVal = this.cache.GetCachedValue("CurrentWeather");
+        if(oCachedVal) {
+            returnObject = oCachedVal;
+            callback(returnObject);
+        } else {
+            //this function will call the weather API, and return it in a format we like
+            if(config.VisualCrossingWeatherURL) {
+                if(config.LincolnNELatLon) {
+                    var returnData = [];
+                    var that = this;
+                    var urlToUse = config.VisualCrossingWeatherURL;
+                    https.get(urlToUse, function(ajaxRes) {
+                        ajaxRes.on("data", function(chunk) {
+                            returnData.push(chunk);
+                        });
+                        ajaxRes.on("error", function(e) {
+                            console.log(e);
+                        });
+                        ajaxRes.on("end", function() {
+                            var body = Buffer.concat(returnData).toString();
+                            returnObject.data = body;
+                            that.cache.AddToCache("CurrentWeather", returnObject, 600);
+                            callback(returnObject);
+                        });
+                    }).on("error", function(err2) {
+                        returnObject.message = err2.message;
+                        returnObject.success = false;
                         callback(returnObject);
                     });
-                }).on("error", function(err2) {
-                    returnObject.message = err2.message;
+                } else {
+                    returnObject.message = "The latitude/longitude couldn't be retrieved for the current location";
                     returnObject.success = false;
                     callback(returnObject);
-                });
+                }
             } else {
-                returnObject.message = "The latitude/longitude couldn't be retrieved for the current location";
+                returnObject.message = "We couldn't parse the config file, so the API key is invalid";
                 returnObject.success = false;
                 callback(returnObject);
             }
-        } else {
-            returnObject.message = "We couldn't parse the config file, so the API key is invalid";
-            returnObject.success = false;
-            callback(returnObject);
         }
     }
 
@@ -105,7 +112,7 @@ class AJAXManager {
     static GetTopStories(storyCount, rssURL, callback) {
         var returnData = [];
         //make the call to the rss feed
-        var ajaxCall = https.get(rssURL, function(ajaxRes) {
+        https.get(rssURL, function(ajaxRes) {
             ajaxRes.on("data", function(chunk) {
                 returnData.push(chunk);
             });
@@ -145,6 +152,60 @@ class AJAXManager {
             };
             callback(errToReturn);
         });
+    }
+
+    GetMarketData(config, callback) {
+        var returnObject = {
+            data: []
+        };
+        var cachedMarketData = this.cache.GetCachedValue("MarketData");
+        if(cachedMarketData) {
+            callback(cachedMarketData);
+        } else {
+            if(config.YahooFinanceMarkets) {
+                var retData = [];
+                var requestOptions = {
+                    headers: {
+                        "X-API-KEY": config.YahooFinanceMarkets.APIKey
+                    }
+                };
+                var that = this;
+                https.get(config.YahooFinanceMarkets.URLEndpoint, requestOptions, function(ajaxRes) {
+                    ajaxRes.on("data", function(chunk) {
+                        retData.push(chunk);
+                    });
+                    ajaxRes.on("end", function() {
+                        var returnObj = Buffer.concat(retData).toString();
+                        var jReturnObj = JSON.parse(returnObj);
+                        new Promise(function(resolve, reject) {
+                            for(var i = 0; i < jReturnObj.marketSummaryResponse.result.length; i++) {
+                                var market = jReturnObj.marketSummaryResponse.result[i];
+                                //S&P 500, dow jones, and BTC/USD
+                                if(market.fullExchangeName == "SNP" || market.fullExchangeName == "DJI" || market.fullExchangeName == "CCC") {
+                                    returnObject.data.push({
+                                        exchangeName: market.fullExchangeName,
+                                        previousCloseVal: market.regularMarketPreviousClose.fmt,
+                                        currentVal: market.regularMarketPrice.fmt,
+                                        changeInUnits: market.regularMarketChange.fmt
+                                    });
+                                }
+                                if(i == jReturnObj.marketSummaryResponse.result.length - 1) {
+                                    returnObject.success = true;
+                                    resolve(returnObject);
+                                }
+                            }
+                        }).then(function(data) {
+                            that.cache.AddToCache("MarketData", data, 1200);
+                            callback(data);
+                        }, function(err) {
+                            callback(err);
+                        });
+                    });
+                }).on("error", function(err) {
+                    callback(err);
+                });
+            }
+        }
     }
 
 }

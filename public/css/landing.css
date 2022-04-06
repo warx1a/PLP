@@ -124,11 +124,10 @@ body {
     background-color: orange;
 }
 
-.todo-holder {
+.stocks-holder {
     height: 60%;
     width: 100%;
     display: block;
-    background-color: magenta;
 }
 
 .lower-container {
@@ -142,4 +141,25 @@ body {
     max-height: 100%;
     position: absolute;
     top: 0px;
+}
+
+.market-holder {
+    height: 33%;
+    text-align: center;
+}
+
+.market-holder p {
+    margin: 0;
+}
+
+.market-holder p:first-of-type {
+    font-weight: bold;
+}
+
+.market-gain {
+    color: green;
+}
+
+.market-loss {
+    color: red;
 }
