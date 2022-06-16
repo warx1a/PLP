@@ -1,5 +1,11 @@
+:root {
+    --section-color: #8f8f8f;
+}
+
 body {
     margin: 0;
+    overflow-y: hidden;
+    background-color: black;
 }
 
 .upper-container {
@@ -9,7 +15,7 @@ body {
 
 .news-holder {
     display: inline-block;
-    background-color: gray;
+    background-color: var(--section-color);
     width: 19.5%;
     height: 100%;
     overflow-y: scroll;
@@ -65,7 +71,7 @@ body {
     height: 100%;
     width: 100%;
     display: block;
-    background-color: cyan;
+    background-color: var(--section-color);
 }
 
 .future-weather {
@@ -118,21 +124,23 @@ body {
 }
 
 .quote-holder {
-    height: 39%;
+    height: 38%;
     width: 100%;
     display: block;
-    background-color: orange;
+    background-color: var(--section-color);
+    border-bottom: 3px solid black;
 }
 
 .stocks-holder {
     height: 60%;
     width: 100%;
     display: block;
+    background-color: var(--section-color);
 }
 
 .lower-container {
     width: 100vw;
-    height: 39vh;
+    height: 40vh;
     background-color: rebeccapurple;
 }
 
@@ -162,4 +170,10 @@ body {
 
 .market-loss {
     color: red;
+}
+
+@media only screen and (min-width: 1281px) {
+    body {
+        font-size: 300%;
+    }
 }
